@@ -1,0 +1,13 @@
+ OS.
+.DS_Store
+
+# Vagrant.
+.vagrant/
+
+# Ansible.
+*.retry
+*/roles/*
+
+# TLS Certificates
+provisioning/files/vagrant_dev_tls
+provisioning/files/svil_tls

@@ -1,0 +1,26 @@
+---
+- name: Install HaProxy as L4 Load Balancer For Vault
+  hosts: loadbalancers
+
+  tasks:
+  - name: Install HaProxy
+    dnf:
+      name:
+        - haproxy
+      state: latest
+
+  - name: HaProxy Configuration Template
+    template:
+      src: templates/haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+      owner: root
+      group: root
+      mode: "0644"
+    register: haproxy_cfg
+
+  - name: Restart HaProxy
+    service:
+      name: haproxy
+      state: restarted
+    when: haproxy_cfg.changed
+

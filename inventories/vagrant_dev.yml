@@ -1,0 +1,41 @@
+all:
+  hosts:
+    haproxy01:
+    vault01:
+    vault02:
+    vault03:
+  vars:
+    ansible_ssh_user: "root"
+    ansible_ssh_pass: "vagrant"
+    ansible_ssh_port: 22
+
+# Use it loadbalancers key only with Vagrant
+loadbalancers:
+  hosts:
+    haproxy01:
+      ansible_ssh_host: "192.168.58.74"
+vault:
+  hosts:
+    svltas01c:
+      ansible_ssh_host: "192.168.58.71"
+      clu_addr: "https://vault01:8201"
+      api_addr: "https://vault01:8200"
+      node_id: "raft_vault_1"
+    svltas02c:
+      ansible_ssh_host: "192.168.58.72"
+      clu_addr: "https://vault02:8201"
+      api_addr: "https://vault02:8200"
+      node_id: "raft_vault_2"
+    svltas03c:
+      ansible_ssh_host: "192.168.58.73"
+      clu_addr: "https://vault03:8201"
+      api_addr: "https://vault03:8200"
+      node_id: "raft_vault_3"
+  vars:
+    vault_data_dir: "/data"
+    vault_package: "vault-1.8.1-1"
+    env: "vagrant_dev"
+    tls:
+      ca_path: "/opt/vault/tls/ca.crt"
+      cert_path: "/opt/vault/tls/tls.crt"
+      key_path: "/opt/vault/tls/tls.key"

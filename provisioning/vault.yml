@@ -1,0 +1,70 @@
+---
+- name: Install Hashicorp Vault
+  hosts: vault
+
+  tasks:
+    - debug:
+        msg: 'Starting playbook for installing Hashicorp Vault. Environment {{ env }}'
+
+    - name: Install Base Packages
+      dnf:
+        name:
+          - yum-utils
+        state: latest
+
+    - name: Add Hashicorp Vault Repository
+      shell: yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+      args:
+        creates: /etc/yum.repos.d/hashicorp.repo
+
+    - name: Install Hashicorp Vault
+      dnf:
+        name: "{{ vault_package }}"
+        state: present
+
+    - name: Give Right Permission To tls.crt
+      file:
+        path: /data
+        owner: vault
+        group: vault
+        mode: 0700
+
+    - name: Vault Configuration Template
+      template:
+        src: templates/vault.hcl.j2
+        dest: /etc/vault.d/vault.hcl
+        owner: vault
+        group: vault
+        mode: 0644
+      register: vault_hcl
+
+    - name: Copy Cert
+      copy:
+        src: "files/{{ env }}_tls/tls.crt"
+        dest: /opt/vault/tls/tls.crt
+        owner: vault
+        group: vault
+        mode: 0644
+
+    - name: Copy Cert Key
+      copy:
+        src: "files/{{ env }}_tls/tls.key"
+        dest: /opt/vault/tls/tls.key
+        owner: vault
+        group: vault
+        mode: 0640
+
+    - name: Copy Cert CA
+      copy:
+        src: "files/{{ env }}_tls/ca.crt"
+        dest: /opt/vault/tls/ca.crt
+        owner: vault
+        group: vault
+        mode: 0444
+
+    - name: Restart Vault
+      service:
+        name: vault
+        state: restarted
+      when: vault_hcl.changed
+
